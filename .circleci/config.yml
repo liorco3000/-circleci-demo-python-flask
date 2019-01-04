@@ -3,9 +3,6 @@ jobs:
   build:
     docker:
       - image: circleci/python:3.6.2-stretch-browsers
-        environment:
-          FLASK_CONFIG: testing
-          TEST_DATABASE_URL: postgresql://ubuntu@localhost/circle_test?sslmode=disable
       - image: circleci/postgres:9.6.5-alpine-ram
         environment:
           POSTGRES_USER: ubuntu
@@ -35,6 +32,14 @@ jobs:
           key: deps1-{{ .Branch }}-{{ checksum "requirements/dev.txt" }}
           paths:
             - "venv"
+  test:
+     docker:
+      - image: circleci/python:3.6.2-stretch-browsers
+        environment:
+          FLASK_CONFIG: testing
+          TEST_DATABASE_URL: postgresql://ubuntu@localhost/circle_test?sslmode=disable
+      steps:
+      - checkout
       - run:
           command: |
             . venv/bin/activate
@@ -44,3 +49,10 @@ jobs:
           destination: tr1
       - store_test_results:
           path: test-reports/
+workflows:
+    version: 2
+    build_and_test:
+      jobs:
+        - build
+        - test
+  See the Sample Parallel Workflow config for a full example.
